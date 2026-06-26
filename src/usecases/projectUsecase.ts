@@ -2,7 +2,7 @@ import { IProjectRepository, Project } from '../domain/Project';
 
 export interface IProjectUsecase {
   getAllProjects(): Promise<Project[]>;
-  createProject(data: { title: string; description: string; url: string }): Promise<Project>;
+  createProject(data: any): Promise<Project>;
 }
 
 export class ProjectUsecase implements IProjectUsecase {
@@ -16,11 +16,17 @@ export class ProjectUsecase implements IProjectUsecase {
     return this.projectRepo.findAll();
   }
 
-  public async createProject(data: { title: string; description: string; url: string }): Promise<Project> {
+  public async createProject(data: any): Promise<Project> {
     const newProject = new Project({
       title: data.title,
-      description: data.description,
-      url: data.url,
+      slug: data.slug,
+      thumbnail: data.thumbnail,
+      content: data.content,
+      demo_url: data.demo_url,
+      repo_url: data.repo_url,
+      is_featured: data.is_featured,
+      published_at: data.published_at,
+      category_id: data.category_id,
     });
     
     // Domain logic validation
