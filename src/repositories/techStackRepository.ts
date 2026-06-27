@@ -22,4 +22,20 @@ export class TechStackRepository implements ITechStackRepository {
     });
     return new TechStack(data.get({ plain: true }));
   }
+
+
+  public async update(id: number, data: Partial<TechStack>): Promise<TechStack | null> {
+    await TechStackModel.update(data, { where: { id } as any });
+    return this.findById(id);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    const deleted = await TechStackModel.destroy({ where: { id } as any });
+    return deleted > 0;
+  }
+
+  public async reorder(id: number, order: number): Promise<boolean> {
+    const updated = await TechStackModel.update({ column_order: order } as any, { where: { id } as any });
+    return updated[0] > 0;
+  }
 }

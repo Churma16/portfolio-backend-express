@@ -13,6 +13,10 @@ export class Project {
   public created_at?: Date;
   public updated_at?: Date;
 
+  public tech_stacks?: any[];
+  public tags?: any[];
+  public category?: any;
+
   constructor(data: any) {
     this.id = data.id;
     this.title = data.title;
@@ -27,6 +31,9 @@ export class Project {
     this.category_id = data.category_id;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
+    this.tech_stacks = data.tech_stacks;
+    this.tags = data.tags;
+    this.category = data.category;
   }
 
   public validate(): void {
@@ -43,4 +50,7 @@ export interface IProjectRepository {
   findAll(): Promise<Project[]>;
   findById(id: number): Promise<Project | null>;
   create(project: Project): Promise<Project>;
+  update(id: number, data: Partial<Project>): Promise<Project | null>;
+  delete(id: number): Promise<boolean>;
+  reorder(id: number, order: number): Promise<boolean>;
 }

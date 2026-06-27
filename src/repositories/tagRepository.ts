@@ -22,4 +22,16 @@ export class TagRepository implements ITagRepository {
     });
     return new Tag(data.get({ plain: true }));
   }
+
+
+  public async update(id: number, data: Partial<Tag>): Promise<Tag | null> {
+    await TagModel.update(data, { where: { id } as any });
+    return this.findById(id);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    const deleted = await TagModel.destroy({ where: { id } as any });
+    return deleted > 0;
+  }
+
 }

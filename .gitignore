@@ -1,2 +1,4 @@
 /node_modules
 /.idea
+update_endpoints.js
+fix_controllers.js

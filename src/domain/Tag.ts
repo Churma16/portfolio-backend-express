@@ -26,4 +26,6 @@ export interface ITagRepository {
   findAll(): Promise<Tag[]>;
   findById(id: number): Promise<Tag | null>;
   create(data: Tag): Promise<Tag>;
+  update(id: number, data: Partial<Tag>): Promise<Tag | null>;
+  delete(id: number): Promise<boolean>;
 }

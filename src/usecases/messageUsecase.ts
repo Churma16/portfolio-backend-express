@@ -3,6 +3,8 @@ import { IMessageRepository, Message } from '../domain/Message';
 export interface IMessageUsecase {
   getAll(): Promise<Message[]>;
   create(data: any): Promise<Message>;
+  update(id: number, data: any): Promise<Message | null>;
+  delete(id: number): Promise<boolean>;
 }
 
 export class MessageUsecase implements IMessageUsecase {
@@ -27,4 +29,14 @@ export class MessageUsecase implements IMessageUsecase {
     newEntity.validate();
     return this.repo.create(newEntity);
   }
+
+
+  public async update(id: number, data: any): Promise<Message | null> {
+    return this.repo.update(id, data);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    return this.repo.delete(id);
+  }
+
 }

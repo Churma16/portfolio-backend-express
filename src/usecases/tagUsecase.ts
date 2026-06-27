@@ -3,6 +3,8 @@ import { ITagRepository, Tag } from '../domain/Tag';
 export interface ITagUsecase {
   getAll(): Promise<Tag[]>;
   create(data: any): Promise<Tag>;
+  update(id: number, data: any): Promise<Tag | null>;
+  delete(id: number): Promise<boolean>;
 }
 
 export class TagUsecase implements ITagUsecase {
@@ -27,4 +29,14 @@ export class TagUsecase implements ITagUsecase {
     newEntity.validate();
     return this.repo.create(newEntity);
   }
+
+
+  public async update(id: number, data: any): Promise<Tag | null> {
+    return this.repo.update(id, data);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    return this.repo.delete(id);
+  }
+
 }

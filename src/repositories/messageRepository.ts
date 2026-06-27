@@ -22,4 +22,16 @@ export class MessageRepository implements IMessageRepository {
     });
     return new Message(data.get({ plain: true }));
   }
+
+
+  public async update(id: number, data: Partial<Message>): Promise<Message | null> {
+    await MessageModel.update(data, { where: { id } as any });
+    return this.findById(id);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    const deleted = await MessageModel.destroy({ where: { id } as any });
+    return deleted > 0;
+  }
+
 }

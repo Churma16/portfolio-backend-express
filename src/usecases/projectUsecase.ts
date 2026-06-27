@@ -1,8 +1,11 @@
 import { IProjectRepository, Project } from '../domain/Project';
 
 export interface IProjectUsecase {
-  getAllProjects(): Promise<Project[]>;
-  createProject(data: any): Promise<Project>;
+  getAll(): Promise<Project[]>;
+  create(data: any): Promise<Project>;
+  update(id: number, data: any): Promise<Project | null>;
+  delete(id: number): Promise<boolean>;
+  reorder(id: number, order: number): Promise<boolean>;
 }
 
 export class ProjectUsecase implements IProjectUsecase {
@@ -12,11 +15,11 @@ export class ProjectUsecase implements IProjectUsecase {
     this.projectRepo = projectRepo;
   }
 
-  public async getAllProjects(): Promise<Project[]> {
+  public async getAll(): Promise<Project[]> {
     return this.projectRepo.findAll();
   }
 
-  public async createProject(data: any): Promise<Project> {
+  public async create(data: any): Promise<Project> {
     const newProject = new Project({
       title: data.title,
       slug: data.slug,
@@ -33,5 +36,18 @@ export class ProjectUsecase implements IProjectUsecase {
     newProject.validate();
 
     return this.projectRepo.create(newProject);
+  }
+
+
+  public async update(id: number, data: any): Promise<Project | null> {
+    return this.projectRepo.update(id, data);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    return this.projectRepo.delete(id);
+  }
+
+  public async reorder(id: number, order: number): Promise<boolean> {
+    return this.projectRepo.reorder(id, order);
   }
 }

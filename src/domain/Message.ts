@@ -26,4 +26,6 @@ export interface IMessageRepository {
   findAll(): Promise<Message[]>;
   findById(id: number): Promise<Message | null>;
   create(data: Message): Promise<Message>;
+  update(id: number, data: Partial<Message>): Promise<Message | null>;
+  delete(id: number): Promise<boolean>;
 }

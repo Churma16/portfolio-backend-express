@@ -30,4 +30,16 @@ export class ProfileRepository implements IProfileRepository {
     });
     return new Profile(data.get({ plain: true }));
   }
+
+
+  public async update(id: number, data: Partial<Profile>): Promise<Profile | null> {
+    await ProfileModel.update(data, { where: { id } as any });
+    return this.findById(id);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    const deleted = await ProfileModel.destroy({ where: { id } as any });
+    return deleted > 0;
+  }
+
 }

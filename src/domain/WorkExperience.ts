@@ -12,6 +12,9 @@ export class WorkExperience {
   public created_at?: Date;
   public updated_at?: Date;
 
+  public tech_stacks?: any[];
+  public tags?: any[];
+
   constructor(data: any) {
     this.id = data.id;
     this.company = data.company;
@@ -25,6 +28,8 @@ export class WorkExperience {
     this.achievements = data.achievements;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
+    this.tech_stacks = data.tech_stacks;
+    this.tags = data.tags;
   }
 
   public validate(): void {
@@ -36,4 +41,7 @@ export interface IWorkExperienceRepository {
   findAll(): Promise<WorkExperience[]>;
   findById(id: number): Promise<WorkExperience | null>;
   create(data: WorkExperience): Promise<WorkExperience>;
+  update(id: number, data: Partial<WorkExperience>): Promise<WorkExperience | null>;
+  delete(id: number): Promise<boolean>;
+  reorder(id: number, order: number): Promise<boolean>;
 }

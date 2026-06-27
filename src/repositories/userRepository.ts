@@ -20,4 +20,16 @@ export class UserRepository implements IUserRepository {
     });
     return new User(data.get({ plain: true }));
   }
+
+
+  public async update(id: number, data: Partial<User>): Promise<User | null> {
+    await UserModel.update(data, { where: { id } as any });
+    return this.findById(id);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    const deleted = await UserModel.destroy({ where: { id } as any });
+    return deleted > 0;
+  }
+
 }

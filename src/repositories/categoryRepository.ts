@@ -21,4 +21,16 @@ export class CategoryRepository implements ICategoryRepository {
     });
     return new Category(data.get({ plain: true }));
   }
+
+
+  public async update(id: number, data: Partial<Category>): Promise<Category | null> {
+    await CategoryModel.update(data, { where: { id } as any });
+    return this.findById(id);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    const deleted = await CategoryModel.destroy({ where: { id } as any });
+    return deleted > 0;
+  }
+
 }

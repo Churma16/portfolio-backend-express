@@ -24,4 +24,6 @@ export interface ICategoryRepository {
   findAll(): Promise<Category[]>;
   findById(id: number): Promise<Category | null>;
   create(data: Category): Promise<Category>;
+  update(id: number, data: Partial<Category>): Promise<Category | null>;
+  delete(id: number): Promise<boolean>;
 }

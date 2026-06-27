@@ -16,10 +16,18 @@ export class User {
   public validate(): void {
     // Add domain validation logic here
   }
+
+  // Fungsi khusus bawaan Javascript yang akan dipanggil otomatis oleh JSON.stringify / res.json
+  public toJSON() {
+    const { password, ...userWithoutPassword } = this;
+    return userWithoutPassword;
+  }
 }
 
 export interface IUserRepository {
   findAll(): Promise<User[]>;
   findById(id: number): Promise<User | null>;
   create(data: User): Promise<User>;
+  update(id: number, data: Partial<User>): Promise<User | null>;
+  delete(id: number): Promise<boolean>;
 }

@@ -3,6 +3,8 @@ import { ICategoryRepository, Category } from '../domain/Category';
 export interface ICategoryUsecase {
   getAll(): Promise<Category[]>;
   create(data: any): Promise<Category>;
+  update(id: number, data: any): Promise<Category | null>;
+  delete(id: number): Promise<boolean>;
 }
 
 export class CategoryUsecase implements ICategoryUsecase {
@@ -26,4 +28,14 @@ export class CategoryUsecase implements ICategoryUsecase {
     newEntity.validate();
     return this.repo.create(newEntity);
   }
+
+
+  public async update(id: number, data: any): Promise<Category | null> {
+    return this.repo.update(id, data);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    return this.repo.delete(id);
+  }
+
 }

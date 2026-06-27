@@ -42,4 +42,6 @@ export interface IProfileRepository {
   findAll(): Promise<Profile[]>;
   findById(id: number): Promise<Profile | null>;
   create(data: Profile): Promise<Profile>;
+  update(id: number, data: Partial<Profile>): Promise<Profile | null>;
+  delete(id: number): Promise<boolean>;
 }

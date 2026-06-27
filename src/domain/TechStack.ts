@@ -26,4 +26,7 @@ export interface ITechStackRepository {
   findAll(): Promise<TechStack[]>;
   findById(id: number): Promise<TechStack | null>;
   create(data: TechStack): Promise<TechStack>;
+  update(id: number, data: Partial<TechStack>): Promise<TechStack | null>;
+  delete(id: number): Promise<boolean>;
+  reorder(id: number, order: number): Promise<boolean>;
 }

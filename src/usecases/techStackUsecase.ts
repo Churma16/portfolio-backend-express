@@ -3,6 +3,9 @@ import { ITechStackRepository, TechStack } from '../domain/TechStack';
 export interface ITechStackUsecase {
   getAll(): Promise<TechStack[]>;
   create(data: any): Promise<TechStack>;
+  update(id: number, data: any): Promise<TechStack | null>;
+  delete(id: number): Promise<boolean>;
+  reorder(id: number, order: number): Promise<boolean>;
 }
 
 export class TechStackUsecase implements ITechStackUsecase {
@@ -26,5 +29,18 @@ export class TechStackUsecase implements ITechStackUsecase {
     
     newEntity.validate();
     return this.repo.create(newEntity);
+  }
+
+
+  public async update(id: number, data: any): Promise<TechStack | null> {
+    return this.repo.update(id, data);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    return this.repo.delete(id);
+  }
+
+  public async reorder(id: number, order: number): Promise<boolean> {
+    return this.repo.reorder(id, order);
   }
 }

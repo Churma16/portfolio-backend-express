@@ -3,6 +3,9 @@ import { IWorkExperienceRepository, WorkExperience } from '../domain/WorkExperie
 export interface IWorkExperienceUsecase {
   getAll(): Promise<WorkExperience[]>;
   create(data: any): Promise<WorkExperience>;
+  update(id: number, data: any): Promise<WorkExperience | null>;
+  delete(id: number): Promise<boolean>;
+  reorder(id: number, order: number): Promise<boolean>;
 }
 
 export class WorkExperienceUsecase implements IWorkExperienceUsecase {
@@ -31,5 +34,18 @@ export class WorkExperienceUsecase implements IWorkExperienceUsecase {
     
     newEntity.validate();
     return this.repo.create(newEntity);
+  }
+
+
+  public async update(id: number, data: any): Promise<WorkExperience | null> {
+    return this.repo.update(id, data);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    return this.repo.delete(id);
+  }
+
+  public async reorder(id: number, order: number): Promise<boolean> {
+    return this.repo.reorder(id, order);
   }
 }

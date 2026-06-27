@@ -3,6 +3,8 @@ import { IProfileRepository, Profile } from '../domain/Profile';
 export interface IProfileUsecase {
   getAll(): Promise<Profile[]>;
   create(data: any): Promise<Profile>;
+  update(id: number, data: any): Promise<Profile | null>;
+  delete(id: number): Promise<boolean>;
 }
 
 export class ProfileUsecase implements IProfileUsecase {
@@ -35,4 +37,14 @@ export class ProfileUsecase implements IProfileUsecase {
     newEntity.validate();
     return this.repo.create(newEntity);
   }
+
+
+  public async update(id: number, data: any): Promise<Profile | null> {
+    return this.repo.update(id, data);
+  }
+
+  public async delete(id: number): Promise<boolean> {
+    return this.repo.delete(id);
+  }
+
 }
