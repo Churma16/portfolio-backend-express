@@ -10,7 +10,8 @@ export class WorkExperienceRepository implements IWorkExperienceRepository {
       include: [
         { model: TechStackModel, as: 'tech_stacks' },
         { model: TagModel, as: 'tags' }
-      ]
+      ],
+      order: [['column_order', 'ASC']]
     });
     return data.map((d) => new WorkExperience(d.get({ plain: true })));
   }

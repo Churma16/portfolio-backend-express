@@ -12,7 +12,8 @@ export class ProjectRepository implements IProjectRepository {
         { model: CategoryModel, as: 'category' },
         { model: TechStackModel, as: 'tech_stacks' },
         { model: TagModel, as: 'tags' }
-      ]
+      ],
+      order: [['column_order', 'ASC']]
     });
     return data.map((d) => new Project(d.get({ plain: true })));
   }

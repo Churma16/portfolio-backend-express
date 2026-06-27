@@ -3,7 +3,9 @@ import { TechStack, ITechStackRepository } from '../domain/TechStack';
 
 export class TechStackRepository implements ITechStackRepository {
   public async findAll(): Promise<TechStack[]> {
-    const data = await TechStackModel.findAll();
+    const data = await TechStackModel.findAll({
+      order: [['column_order', 'ASC']]
+    });
     return data.map((d) => new TechStack(d.get({ plain: true })));
   }
 

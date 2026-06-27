@@ -3,7 +3,9 @@ import { Tag, ITagRepository } from '../domain/Tag';
 
 export class TagRepository implements ITagRepository {
   public async findAll(): Promise<Tag[]> {
-    const data = await TagModel.findAll();
+    const data = await TagModel.findAll({
+      order: [['name', 'ASC']]
+    });
     return data.map((d) => new Tag(d.get({ plain: true })));
   }
 
