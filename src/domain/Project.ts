@@ -13,7 +13,7 @@ export class Project {
   public created_at?: Date;
   public updated_at?: Date;
 
-  public tech_stacks?: any[];
+  public tech_stack?: any[];
   public tags?: any[];
   public category?: any;
 
@@ -31,7 +31,7 @@ export class Project {
     this.category_id = data.category_id;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
-    this.tech_stacks = data.tech_stacks;
+    this.tech_stack = data.tech_stacks || data.tech_stack || data.techStacks;
     this.tags = data.tags;
     this.category = data.category;
   }

@@ -12,7 +12,7 @@ export class WorkExperience {
   public created_at?: Date;
   public updated_at?: Date;
 
-  public tech_stacks?: any[];
+  public tech_stack?: any[];
   public tags?: any[];
 
   constructor(data: any) {
@@ -28,7 +28,7 @@ export class WorkExperience {
     this.achievements = data.achievements;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
-    this.tech_stacks = data.tech_stacks;
+    this.tech_stack = data.tech_stacks || data.tech_stack || data.techStacks;
     this.tags = data.tags;
   }
 
