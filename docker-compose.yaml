@@ -1,4 +1,4 @@
-version: "3.8"
+
 
 services:
   # 1. Aplikasi Express
@@ -49,3 +49,4 @@ services:
 networks:
   portfolio_network:
     external: true
+    name: go-portfolio-api_portfolio_network
