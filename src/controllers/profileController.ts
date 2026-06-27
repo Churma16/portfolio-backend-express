@@ -13,7 +13,8 @@ export class ProfileController {
     try {
       const data = await this.usecase.getAll();
       const meta = newMeta(200, 'success', 'Profile retrieved successfully');
-      res.status(200).json(newMultipleDataResponse(meta, data));
+      const singleProfile = (data && data.length > 0) ? data[0] : null;
+      res.status(200).json(newSingleDataResponse(meta, singleProfile));
     } catch (error: any) {
       res.status(500).json(errorResponse(500, 'error', error.message));
     }
