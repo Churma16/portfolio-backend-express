@@ -2,3 +2,6 @@
 /.idea
 update_endpoints.js
 fix_controllers.js
+.env
+src/grep.exe.stackdump
+delete-techstack.ts
