@@ -31,6 +31,7 @@ import { ProfileController } from '../controllers/profileController';
 import { WorkExperienceRepository } from '../repositories/workExperienceRepository';
 import { WorkExperienceUsecase } from '../usecases/workExperienceUsecase';
 import { WorkExperienceController } from '../controllers/workExperienceController';
+import { HealthController } from '../controllers/healthController';
 
 import { authMiddleware } from '../shared/middlewares/authMiddleware';
 import { rateLimiterMiddleware } from '../shared/middlewares/rateLimiterMiddleware';
@@ -48,6 +49,7 @@ const techStackController = new TechStackController(new TechStackUsecase(new Tec
 const tagController = new TagController(new TagUsecase(new TagRepository()));
 const profileController = new ProfileController(new ProfileUsecase(new ProfileRepository()));
 const workExperienceController = new WorkExperienceController(new WorkExperienceUsecase(new WorkExperienceRepository()));
+const healthController = new HealthController();
 
 // ==========================================
 // ROUTES GROUPS
@@ -55,7 +57,7 @@ const workExperienceController = new WorkExperienceController(new WorkExperience
 
 // --- PUBLIC ROUTES ---
 apiRouter.get('/', (req, res) => { res.json({ message: 'API is running' }); });
-apiRouter.get('/health', (req, res) => { res.json({ message: 'OK' }); });
+apiRouter.get('/health', (req, res) => healthController.check(req, res));
 
 // Auth (Note: login/me would be custom methods in UserController, currently mapped to default creation as placeholder for generic endpoints)
 apiRouter.post('/login', (req, res) => userController.create(req, res)); // Assume custom logic added later
