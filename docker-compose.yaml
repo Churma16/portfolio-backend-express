@@ -13,8 +13,7 @@ services:
       - DB_USER=${DB_USER_GO}
       - DB_PASSWORD=${DB_PASSWORD_GO}
       - DB_NAME=${DB_NAME_GO}
-      - REDIS_HOST=express_redis
-      - REDIS_PORT=6379
+      - REDIS_URL=redis://express_redis:6379
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
