@@ -16,12 +16,19 @@ export class WorkExperience {
   public tags?: any[];
 
   constructor(data: any) {
+    const formatDateStr = (dateVal: any): string | undefined => {
+      if (!dateVal) return undefined;
+      const dateObj = new Date(dateVal);
+      if (isNaN(dateObj.getTime())) return String(dateVal);
+      return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    };
+
     this.id = data.id;
     this.company = data.company;
     this.position = data.position;
     this.location = data.location;
-    this.start_date = data.start_date;
-    this.end_date = data.end_date;
+    this.start_date = formatDateStr(data.start_date);
+    this.end_date = formatDateStr(data.end_date);
     this.is_current = data.is_current;
     this.description = data.description;
     this.column_order = data.column_order;
