@@ -25,6 +25,7 @@ export class TechStackUsecase implements ITechStackUsecase {
       slug: data.slug,
       icon: data.icon,
       column_order: data.column_order,
+      tech_stack_category_id: data.tech_stack_category_id,
     });
     
     newEntity.validate();

@@ -33,6 +33,10 @@ import { WorkExperienceUsecase } from '../usecases/workExperienceUsecase';
 import { WorkExperienceController } from '../controllers/workExperienceController';
 import { HealthController } from '../controllers/healthController';
 
+import { TechStackCategoryRepository } from '../repositories/techStackCategoryRepository';
+import { TechStackCategoryUsecase } from '../usecases/techStackCategoryUsecase';
+import { TechStackCategoryController } from '../controllers/techStackCategoryController';
+
 import { authMiddleware } from '../shared/middlewares/authMiddleware';
 import { rateLimiterMiddleware } from '../shared/middlewares/rateLimiterMiddleware';
 
@@ -49,6 +53,7 @@ const techStackController = new TechStackController(new TechStackUsecase(new Tec
 const tagController = new TagController(new TagUsecase(new TagRepository()));
 const profileController = new ProfileController(new ProfileUsecase(new ProfileRepository()));
 const workExperienceController = new WorkExperienceController(new WorkExperienceUsecase(new WorkExperienceRepository()));
+const techStackCategoryController = new TechStackCategoryController(new TechStackCategoryUsecase(new TechStackCategoryRepository()));
 const healthController = new HealthController();
 
 // ==========================================
@@ -70,6 +75,9 @@ apiRouter.get('/categories/:id', (req, res) => categoryController.getById(req, r
 
 apiRouter.get('/tech-stacks', (req, res) => techStackController.getAll(req, res));
 apiRouter.get('/tech-stacks/:id', (req, res) => techStackController.getById(req, res));
+
+apiRouter.get('/tech-stack-categories', (req, res) => techStackCategoryController.getAll(req, res));
+apiRouter.get('/tech-stack-categories/:id', (req, res) => techStackCategoryController.getById(req, res));
 
 apiRouter.get('/tags', (req, res) => tagController.getAll(req, res));
 apiRouter.get('/tags/:id', (req, res) => tagController.getById(req, res));
@@ -101,6 +109,10 @@ apiRouter.post('/tech-stacks', (req, res) => techStackController.create(req, res
 apiRouter.put('/tech-stacks/:id', (req, res) => techStackController.update(req, res));
 apiRouter.delete('/tech-stacks/:id', (req, res) => techStackController.delete(req, res));
 apiRouter.post('/tech-stacks/:id/reorder', (req, res) => techStackController.reorder(req, res));
+
+apiRouter.post('/tech-stack-categories', (req, res) => techStackCategoryController.create(req, res));
+apiRouter.put('/tech-stack-categories/:id', (req, res) => techStackCategoryController.update(req, res));
+apiRouter.delete('/tech-stack-categories/:id', (req, res) => techStackCategoryController.delete(req, res));
 
 apiRouter.post('/tags', (req, res) => tagController.create(req, res));
 apiRouter.put('/tags/:id', (req, res) => tagController.update(req, res));

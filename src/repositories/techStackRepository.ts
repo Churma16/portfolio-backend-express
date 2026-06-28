@@ -21,6 +21,7 @@ export class TechStackRepository implements ITechStackRepository {
       slug: entity.slug,
       icon: entity.icon,
       column_order: entity.column_order,
+      tech_stack_category_id: entity.tech_stack_category_id,
     });
     return new TechStack(data.get({ plain: true }));
   }

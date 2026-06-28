@@ -7,6 +7,7 @@ interface TechStackAttributes {
   slug: string;
   icon?: string;
   column_order?: number;
+  tech_stack_category_id?: number;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -19,6 +20,7 @@ export class TechStackModel extends Model<TechStackAttributes, TechStackCreation
   public slug!: string;
   public icon?: string;
   public column_order?: number;
+  public tech_stack_category_id?: number;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
 }
@@ -46,6 +48,14 @@ TechStackModel.init(
     column_order: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    tech_stack_category_id: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'tech_stack_categories',
+        key: 'id',
+      },
     },
     created_at: {
       type: DataTypes.DATE,

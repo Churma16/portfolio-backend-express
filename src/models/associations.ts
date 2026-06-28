@@ -3,6 +3,7 @@ import { TechStackModel } from './TechStackModel';
 import { TagModel } from './TagModel';
 import { WorkExperienceModel } from './WorkExperienceModel';
 import { CategoryModel } from './CategoryModel';
+import { TechStackCategoryModel } from './TechStackCategoryModel';
 
 export const setupAssociations = () => {
   // Category Associations
@@ -11,6 +12,10 @@ export const setupAssociations = () => {
 
   CategoryModel.hasMany(TagModel, { foreignKey: 'category_id', as: 'tags' });
   TagModel.belongsTo(CategoryModel, { foreignKey: 'category_id', as: 'category' });
+
+  // Tech Stack Category Associations
+  TechStackCategoryModel.hasMany(TechStackModel, { foreignKey: 'tech_stack_category_id', as: 'tech_stacks' });
+  TechStackModel.belongsTo(TechStackCategoryModel, { foreignKey: 'tech_stack_category_id', as: 'tech_stack_category' });
 
   // Project <-> TechStack
   ProjectModel.belongsToMany(TechStackModel, {

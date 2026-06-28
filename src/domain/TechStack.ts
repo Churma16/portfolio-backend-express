@@ -4,6 +4,7 @@ export class TechStack {
   public slug: string;
   public icon?: string;
   public column_order?: number;
+  public tech_stack_category_id?: number;
   public created_at?: Date;
   public updated_at?: Date;
 
@@ -13,6 +14,7 @@ export class TechStack {
     this.slug = data.slug;
     this.icon = data.icon;
     this.column_order = data.column_order;
+    this.tech_stack_category_id = data.tech_stack_category_id;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
