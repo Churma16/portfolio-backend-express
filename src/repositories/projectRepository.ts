@@ -13,7 +13,10 @@ export class ProjectRepository implements IProjectRepository {
         { model: TechStackModel, as: 'tech_stacks' },
         { model: TagModel, as: 'tags' }
       ],
-      order: [['column_order', 'ASC']]
+      order: [
+        ['column_order', 'ASC'],
+        [{ model: TechStackModel, as: 'tech_stacks' }, 'column_order', 'ASC']
+      ]
     });
     return data.map((d) => new Project(d.get({ plain: true })));
   }
@@ -24,6 +27,9 @@ export class ProjectRepository implements IProjectRepository {
         { model: CategoryModel, as: 'category' },
         { model: TechStackModel, as: 'tech_stacks' },
         { model: TagModel, as: 'tags' }
+      ],
+      order: [
+        [{ model: TechStackModel, as: 'tech_stacks' }, 'column_order', 'ASC']
       ]
     });
     if (!data) return null;

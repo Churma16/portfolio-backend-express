@@ -11,7 +11,10 @@ export class WorkExperienceRepository implements IWorkExperienceRepository {
         { model: TechStackModel, as: 'tech_stacks' },
         { model: TagModel, as: 'tags' }
       ],
-      order: [['column_order', 'ASC']]
+      order: [
+        ['column_order', 'ASC'],
+        [{ model: TechStackModel, as: 'tech_stacks' }, 'column_order', 'ASC']
+      ]
     });
     return data.map((d) => new WorkExperience(d.get({ plain: true })));
   }
@@ -21,6 +24,9 @@ export class WorkExperienceRepository implements IWorkExperienceRepository {
       include: [
         { model: TechStackModel, as: 'tech_stacks' },
         { model: TagModel, as: 'tags' }
+      ],
+      order: [
+        [{ model: TechStackModel, as: 'tech_stacks' }, 'column_order', 'ASC']
       ]
     });
     if (!data) return null;
