@@ -39,6 +39,7 @@ import { TechStackCategoryController } from '../controllers/techStackCategoryCon
 
 import { authMiddleware } from '../shared/middlewares/authMiddleware';
 import { rateLimiterMiddleware } from '../shared/middlewares/rateLimiterMiddleware';
+import { InternalController } from '../controllers/internalController';
 
 const apiRouter = Router();
 
@@ -55,6 +56,7 @@ const profileController = new ProfileController(new ProfileUsecase(new ProfileRe
 const workExperienceController = new WorkExperienceController(new WorkExperienceUsecase(new WorkExperienceRepository()));
 const techStackCategoryController = new TechStackCategoryController(new TechStackCategoryUsecase(new TechStackCategoryRepository()));
 const healthController = new HealthController();
+const internalController = new InternalController();
 
 // ==========================================
 // ROUTES GROUPS
@@ -63,6 +65,9 @@ const healthController = new HealthController();
 // --- PUBLIC ROUTES ---
 apiRouter.get('/', (req, res) => { res.json({ message: 'API is running' }); });
 apiRouter.get('/health', (req, res) => healthController.check(req, res));
+
+// Secure cache invalidation endpoint called by Go API
+apiRouter.post('/internal/cache/invalidate', (req, res) => internalController.invalidateCache(req, res));
 
 // Auth (Note: login/me would be custom methods in UserController, currently mapped to default creation as placeholder for generic endpoints)
 apiRouter.post('/login', (req, res) => userController.create(req, res)); // Assume custom logic added later
