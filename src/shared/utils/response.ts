@@ -1,3 +1,5 @@
+import { Response } from 'express';
+
 export interface Meta {
   code: number;
   status: string;
@@ -5,35 +7,19 @@ export interface Meta {
   count?: number;
 }
 
-export interface SingleDataResponse<T> {
+export interface ApiResponse<T> {
   meta: Meta;
-  data: T;
+  data: T | null;
 }
 
-export interface MultipleDataResponse<T> {
-  meta: Meta;
-  data: T[];
+export function sendSuccess<T>(res: Response, code: number, message: string, data: T, count?: number): void {
+  const meta: Meta = { code, status: 'success', message };
+  if (count !== undefined) meta.count = count;
+  
+  res.status(code).json({ meta, data });
 }
 
-export function newMeta(code: number, status: string, message: string): Meta {
-  return { code, status, message };
-}
-
-export function newMetaWithCount(code: number, status: string, message: string, count: number): Meta {
-  return { code, status, message, count };
-}
-
-export function newSingleDataResponse<T>(meta: Meta, data: T): SingleDataResponse<T> {
-  return { meta, data };
-}
-
-export function newMultipleDataResponse<T>(meta: Meta, data: T[]): MultipleDataResponse<T> {
-  return { meta, data };
-}
-
-export function errorResponse(code: number, status: string, message: string): SingleDataResponse<null> {
-  return {
-    meta: newMeta(code, status, message),
-    data: null,
-  };
+export function sendError(res: Response, code: number, message: string): void {
+  const meta: Meta = { code, status: 'error', message };
+  res.status(code).json({ meta, data: null });
 }
