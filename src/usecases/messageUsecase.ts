@@ -1,4 +1,5 @@
 import { IMessageRepository, Message } from '../domain/Message';
+import { getContactEmailTemplate } from '../shared/utils/emailTemplate';
 
 export interface IMessageUsecase {
   getAll(): Promise<Message[]>;
@@ -7,11 +8,15 @@ export interface IMessageUsecase {
   delete(id: number): Promise<boolean>;
 }
 
+import { Resend } from 'resend';
+
 export class MessageUsecase implements IMessageUsecase {
   private repo: IMessageRepository;
+  private resend: Resend;
 
   constructor(repo: IMessageRepository) {
     this.repo = repo;
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   public async getAll(): Promise<Message[]> {
@@ -23,11 +28,32 @@ export class MessageUsecase implements IMessageUsecase {
       name: data.name,
       email: data.email,
       content: data.content,
-      is_read: data.is_read,
+      is_read: data.is_read || false,
     });
     
     newEntity.validate();
-    return this.repo.create(newEntity);
+    const createdMessage = await this.repo.create(newEntity);
+
+    // Send email notification asynchronously
+    if (process.env.RESEND_API_KEY) {
+      const emailHtml = getContactEmailTemplate({
+        name: data.name,
+        email: data.email,
+        content: data.content
+      });
+
+      this.resend.emails.send({
+        from: `Portfolio Contact <${process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`, 
+        to: process.env.MY_EMAIL || 'fathan@example.com', 
+        subject: `[Pesan Baru]: ${data.name}`,
+        html: emailHtml,
+        replyTo: data.email,
+      }).catch(err => {
+        console.error('Failed to send email via Resend:', err);
+      });
+    }
+
+    return createdMessage;
   }
 
 

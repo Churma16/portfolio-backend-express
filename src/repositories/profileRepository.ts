@@ -4,7 +4,7 @@ import { Profile, IProfileRepository } from '../domain/Profile';
 export class ProfileRepository implements IProfileRepository {
   public async findAll(): Promise<Profile[]> {
     const data = await ProfileModel.findAll({
-      order: [['created_at', 'ASC']] // in Go they also use LIMIT 1 for /profiles GET, but we'll leave it as findAll and Frontend will handle if it gets an array, or if they only expect 1 we can add limit: 1. Let's just add order.
+      order: [['created_at', 'ASC']]
     });
     return data.map((d) => new Profile(d.get({ plain: true })));
   }
