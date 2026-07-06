@@ -15,14 +15,13 @@ export class HealthController {
       }
       const endRedis = performance.now();
       const redisProcessingTime = Number((endRedis - startRedis).toFixed(2));
-
-      const meta = newMeta(200, 'success', 'Health check ok');
-      res.status(200).json(newSingleDataResponse(meta, {
+      res.status(200).json({
+        status: 'ok',
         redis_alive: redisAlive,
         redis_processing_time: redisProcessingTime,
-      }));
+      });
     } catch (error: any) {
-      res.status(500).json(errorResponse(500, 'error', error.message));
+      res.status(500).json({ status: 'error', message: error.message });
     }
   }
 }
