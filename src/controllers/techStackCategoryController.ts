@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ITechStackCategoryUsecase } from '../usecases/techStackCategoryUsecase';
-import { newMeta, newMultipleDataResponse, newSingleDataResponse, errorResponse } from '../shared/utils/response';
+import { sendSuccess, sendError } from '../shared/utils/response';
 import redisClient from '../config/redis';
 import { deleteCacheByPrefix } from '../shared/utils/cache';
 
@@ -16,18 +16,16 @@ export class TechStackCategoryController {
       const cacheKey = 'tech_stack_categories:all';
       const cached = await redisClient.get(cacheKey);
       if (cached) {
-        const meta = newMeta(200, 'success', 'TechStackCategory retrieved successfully');
-        res.status(200).json(newMultipleDataResponse(meta, JSON.parse(cached)));
+        sendSuccess(res, 200, 'TechStackCategory retrieved successfully', JSON.parse(cached));
         return;
       }
 
       const data = await this.usecase.getAll();
       await redisClient.set(cacheKey, JSON.stringify(data), 'EX', 3600);
 
-      const meta = newMeta(200, 'success', 'TechStackCategory retrieved successfully');
-      res.status(200).json(newMultipleDataResponse(meta, data));
+      sendSuccess(res, 200, 'TechStackCategory retrieved successfully', data);
     } catch (error: any) {
-      res.status(500).json(errorResponse(500, 'error', error.message));
+      sendError(res, 500, error.message);
     }
   }
 
@@ -37,10 +35,9 @@ export class TechStackCategoryController {
       await deleteCacheByPrefix('tech_stack_categories:');
       await deleteCacheByPrefix('tech_stacks:'); // Clear tech stacks cache as well
 
-      const meta = newMeta(201, 'success', 'TechStackCategory created successfully');
-      res.status(201).json(newSingleDataResponse(meta, data));
+      sendSuccess(res, 201, 'TechStackCategory created successfully', data);
     } catch (error: any) {
-      res.status(400).json(errorResponse(400, 'error', error.message));
+      sendError(res, 400, error.message);
     }
   }
 
@@ -50,8 +47,7 @@ export class TechStackCategoryController {
       const cacheKey = `tech_stack_categories:${id}`;
       const cached = await redisClient.get(cacheKey);
       if (cached) {
-        const meta = newMeta(200, 'success', 'TechStackCategory retrieved successfully');
-        res.status(200).json(newSingleDataResponse(meta, JSON.parse(cached)));
+        sendSuccess(res, 200, 'TechStackCategory retrieved successfully', JSON.parse(cached));
         return;
       }
 
@@ -60,10 +56,9 @@ export class TechStackCategoryController {
         await redisClient.set(cacheKey, JSON.stringify(data), 'EX', 3600);
       }
 
-      const meta = newMeta(200, 'success', 'TechStackCategory retrieved successfully');
-      res.status(200).json(newSingleDataResponse(meta, data));
+      sendSuccess(res, 200, 'TechStackCategory retrieved successfully', data);
     } catch (error: any) {
-      res.status(500).json(errorResponse(500, 'error', error.message));
+      sendError(res, 500, error.message);
     }
   }
 
@@ -74,10 +69,9 @@ export class TechStackCategoryController {
       await deleteCacheByPrefix('tech_stack_categories:');
       await deleteCacheByPrefix('tech_stacks:');
 
-      const meta = newMeta(200, 'success', 'TechStackCategory updated successfully');
-      res.status(200).json(newSingleDataResponse(meta, data));
+      sendSuccess(res, 200, 'TechStackCategory updated successfully', data);
     } catch (error: any) {
-      res.status(400).json(errorResponse(400, 'error', error.message));
+      sendError(res, 400, error.message);
     }
   }
 
@@ -88,10 +82,9 @@ export class TechStackCategoryController {
       await deleteCacheByPrefix('tech_stack_categories:');
       await deleteCacheByPrefix('tech_stacks:');
 
-      const meta = newMeta(200, 'success', 'TechStackCategory deleted successfully');
-      res.status(200).json(newSingleDataResponse(meta, null));
+      sendSuccess(res, 200, 'TechStackCategory deleted successfully', null);
     } catch (error: any) {
-      res.status(400).json(errorResponse(400, 'error', error.message));
+      sendError(res, 400, error.message);
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt';
-import { errorResponse } from '../utils/response';
+import { sendError } from '../utils/response';
 
 // Extend Express Request to hold user data
 export interface AuthRequest extends Request {
@@ -10,7 +10,7 @@ export interface AuthRequest extends Request {
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json(errorResponse(401, 'unauthorized', 'Missing or invalid token'));
+    sendError(res, 401, 'Missing or invalid token');
     return;
   }
 
@@ -20,6 +20,6 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json(errorResponse(401, 'unauthorized', 'Token is expired or invalid'));
+    sendError(res, 401, 'Token is expired or invalid');
   }
 };

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import redisClient from '../../config/redis';
-import { errorResponse } from '../utils/response';
+import { sendError } from '../utils/response';
 
 export const rateLimiterMiddleware = (limitRule: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -23,7 +23,7 @@ export const rateLimiterMiddleware = (limitRule: string) => {
       }
 
       if (current > maxRequests) {
-        res.status(429).json(errorResponse(429, 'error', 'Rate limit exceeded. Please try again later.'));
+        sendError(res, 429, 'Rate limit exceeded. Please try again later.');
         return;
       }
       next();
