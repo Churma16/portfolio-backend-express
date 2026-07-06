@@ -16,7 +16,7 @@ export class MessageUsecase implements IMessageUsecase {
 
   constructor(repo: IMessageRepository) {
     this.repo = repo;
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_123');
   }
 
   public async getAll(): Promise<Message[]> {

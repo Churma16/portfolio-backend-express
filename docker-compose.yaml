@@ -5,6 +5,8 @@ services:
   api:
     build: .
     container_name: express_portfolio
+    env_file:
+      - .env
     environment:
       - PORT=4000
       # Gunakan variabel env untuk koneksi database
