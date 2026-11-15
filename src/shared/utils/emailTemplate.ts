@@ -1,4 +1,18 @@
+function escapeHtml(unsafeText: string): string {
+  if (!unsafeText) return '';
+  return unsafeText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function getContactEmailTemplate(data: { name: string; email: string; content: string }): string {
+  const sanitizedName = escapeHtml(data.name);
+  const sanitizedEmail = escapeHtml(data.email);
+  const sanitizedContent = escapeHtml(data.content);
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -124,18 +138,18 @@ export function getContactEmailTemplate(data: { name: string; email: string; con
         </div>
         <div class="content">
             <div class="label">Dari</div>
-            <div class="value">${data.name}</div>
+            <div class="value">${sanitizedName}</div>
 
             <div class="label">Email Pengirim</div>
-            <div class="value"><a href="mailto:${data.email}" style="color: #328AF1; text-decoration: none;">${data.email}</a></div>
+            <div class="value"><a href="mailto:${sanitizedEmail}" style="color: #328AF1; text-decoration: none;">${sanitizedEmail}</a></div>
 
             <div class="label">Pesan</div>
             <div class="message-box">
-                "${data.content}"
+                "${sanitizedContent}"
             </div>
 
             <div style="text-align: center;">
-                <a href="mailto:${data.email}" class="btn">Balas Pesan</a>
+                <a href="mailto:${sanitizedEmail}" class="btn">Balas Pesan</a>
             </div>
         </div>
     </div>

@@ -69,8 +69,8 @@ apiRouter.get('/health', (req, res) => healthController.check(req, res));
 // Secure cache invalidation endpoint called by Go API
 apiRouter.post('/internal/cache/invalidate', (req, res) => internalController.invalidateCache(req, res));
 
-// Auth (Note: login/me would be custom methods in UserController, currently mapped to default creation as placeholder for generic endpoints)
-apiRouter.post('/login', (req, res) => userController.create(req, res)); // Assume custom logic added later
+// Auth
+apiRouter.post('/login', (req, res) => userController.login(req, res));
 
 apiRouter.get('/projects', (req, res) => projectController.getAll(req, res));
 apiRouter.get('/projects/:id', (req, res) => projectController.getById(req, res));
@@ -88,7 +88,7 @@ apiRouter.get('/tags', (req, res) => tagController.getAll(req, res));
 apiRouter.get('/tags/:id', (req, res) => tagController.getById(req, res));
 
 apiRouter.get('/profiles', (req, res) => profileController.getAll(req, res));
-apiRouter.get('/profiles/:user_id', (req, res) => profileController.getById(req, res)); // Simplified parameter
+apiRouter.get('/profiles/:id', (req, res) => profileController.getById(req, res));
 
 apiRouter.get('/work-experiences', (req, res) => workExperienceController.getAll(req, res));
 apiRouter.get('/work-experiences/:id', (req, res) => workExperienceController.getById(req, res));

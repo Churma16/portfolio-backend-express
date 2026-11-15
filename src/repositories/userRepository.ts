@@ -13,6 +13,12 @@ export class UserRepository implements IUserRepository {
     return new User(data.get({ plain: true }));
   }
 
+  public async findByEmail(email: string): Promise<User | null> {
+    const data = await UserModel.findOne({ where: { email } });
+    if (!data) return null;
+    return new User(data.get({ plain: true }));
+  }
+
   public async create(entity: User): Promise<User> {
     const data = await UserModel.create({
       email: entity.email,
