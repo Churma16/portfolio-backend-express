@@ -1,5 +1,7 @@
 /node_modules
 /.idea
+/dist
+dist/
 update_endpoints.js
 fix_controllers.js
 .env
