@@ -29,6 +29,21 @@ export class UserController {
     }
   }
 
+  public async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        res.status(400).json(errorResponse(400, 'error', 'Email and password are required'));
+        return;
+      }
+      const data = await this.usecase.login(email, password);
+      const meta = newMeta(200, 'success', 'Login successful');
+      res.status(200).json(newSingleDataResponse(meta, data));
+    } catch (error: any) {
+      res.status(401).json(errorResponse(401, 'error', error.message));
+    }
+  }
+
 
   public async getById(req: Request, res: Response): Promise<void> {
     try {

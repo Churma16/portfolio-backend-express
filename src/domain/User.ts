@@ -27,6 +27,7 @@ export class User {
 export interface IUserRepository {
   findAll(): Promise<User[]>;
   findById(id: number): Promise<User | null>;
+  findByEmail(email: string): Promise<User | null>;
   create(data: User): Promise<User>;
   update(id: number, data: Partial<User>): Promise<User | null>;
   delete(id: number): Promise<boolean>;
