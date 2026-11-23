@@ -5,7 +5,7 @@ export interface IProjectUsecase {
   create(data: any): Promise<Project>;
   update(id: number, data: any): Promise<Project | null>;
   delete(id: number): Promise<boolean>;
-  reorder(id: number, order: number): Promise<boolean>;
+  reorder(id: number, direction: 'up' | 'down'): Promise<boolean>;
 }
 
 export class ProjectUsecase implements IProjectUsecase {
@@ -47,7 +47,7 @@ export class ProjectUsecase implements IProjectUsecase {
     return this.projectRepo.delete(id);
   }
 
-  public async reorder(id: number, order: number): Promise<boolean> {
-    return this.projectRepo.reorder(id, order);
+  public async reorder(id: number, direction: 'up' | 'down'): Promise<boolean> {
+    return this.projectRepo.reorder(id, direction);
   }
 }

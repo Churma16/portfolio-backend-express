@@ -50,5 +50,5 @@ export interface IWorkExperienceRepository {
   create(data: WorkExperience): Promise<WorkExperience>;
   update(id: number, data: Partial<WorkExperience>): Promise<WorkExperience | null>;
   delete(id: number): Promise<boolean>;
-  reorder(id: number, order: number): Promise<boolean>;
+  reorder(id: number, direction: 'up' | 'down'): Promise<boolean>;
 }

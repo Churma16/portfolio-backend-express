@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+import sequelize from '../config/database';
 import { WorkExperienceModel } from '../models/WorkExperienceModel';
 import { WorkExperience, IWorkExperienceRepository } from '../domain/WorkExperience';
 
@@ -59,8 +61,45 @@ export class WorkExperienceRepository implements IWorkExperienceRepository {
     return deleted > 0;
   }
 
-  public async reorder(id: number, order: number): Promise<boolean> {
-    const updated = await WorkExperienceModel.update({ column_order: order } as any, { where: { id } as any });
-    return updated[0] > 0;
+  public async reorder(id: number, direction: 'up' | 'down'): Promise<boolean> {
+    const currentWorkExperience = await WorkExperienceModel.findByPk(id);
+    if (!currentWorkExperience) {
+      return false;
+    }
+
+    const currentOrder = currentWorkExperience.column_order ?? 0;
+    const operator = direction === 'up' ? Op.lt : Op.gt;
+    const sortOrder: 'DESC' | 'ASC' = direction === 'up' ? 'DESC' : 'ASC';
+
+    const adjacentWorkExperience = await WorkExperienceModel.findOne({
+      where: {
+        column_order: {
+          [operator]: currentOrder,
+        },
+      },
+      order: [['column_order', sortOrder]],
+    });
+
+    if (!adjacentWorkExperience) {
+      return true;
+    }
+
+    const transaction = await sequelize.transaction();
+    try {
+      const adjacentOrder = adjacentWorkExperience.column_order;
+      await WorkExperienceModel.update(
+        { column_order: adjacentOrder },
+        { where: { id: currentWorkExperience.id }, transaction }
+      );
+      await WorkExperienceModel.update(
+        { column_order: currentOrder },
+        { where: { id: adjacentWorkExperience.id }, transaction }
+      );
+      await transaction.commit();
+      return true;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 }

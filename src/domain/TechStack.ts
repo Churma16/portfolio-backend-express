@@ -30,5 +30,5 @@ export interface ITechStackRepository {
   create(data: TechStack): Promise<TechStack>;
   update(id: number, data: Partial<TechStack>): Promise<TechStack | null>;
   delete(id: number): Promise<boolean>;
-  reorder(id: number, order: number): Promise<boolean>;
+  reorder(id: number, direction: 'up' | 'down'): Promise<boolean>;
 }
