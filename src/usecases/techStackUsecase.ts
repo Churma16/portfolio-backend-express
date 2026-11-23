@@ -5,7 +5,7 @@ export interface ITechStackUsecase {
   create(data: any): Promise<TechStack>;
   update(id: number, data: any): Promise<TechStack | null>;
   delete(id: number): Promise<boolean>;
-  reorder(id: number, order: number): Promise<boolean>;
+  reorder(id: number, direction: 'up' | 'down'): Promise<boolean>;
 }
 
 export class TechStackUsecase implements ITechStackUsecase {
@@ -41,7 +41,7 @@ export class TechStackUsecase implements ITechStackUsecase {
     return this.repo.delete(id);
   }
 
-  public async reorder(id: number, order: number): Promise<boolean> {
-    return this.repo.reorder(id, order);
+  public async reorder(id: number, direction: 'up' | 'down'): Promise<boolean> {
+    return this.repo.reorder(id, direction);
   }
 }

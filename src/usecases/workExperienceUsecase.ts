@@ -5,7 +5,7 @@ export interface IWorkExperienceUsecase {
   create(data: any): Promise<WorkExperience>;
   update(id: number, data: any): Promise<WorkExperience | null>;
   delete(id: number): Promise<boolean>;
-  reorder(id: number, order: number): Promise<boolean>;
+  reorder(id: number, direction: 'up' | 'down'): Promise<boolean>;
 }
 
 export class WorkExperienceUsecase implements IWorkExperienceUsecase {
@@ -45,7 +45,7 @@ export class WorkExperienceUsecase implements IWorkExperienceUsecase {
     return this.repo.delete(id);
   }
 
-  public async reorder(id: number, order: number): Promise<boolean> {
-    return this.repo.reorder(id, order);
+  public async reorder(id: number, direction: 'up' | 'down'): Promise<boolean> {
+    return this.repo.reorder(id, direction);
   }
 }

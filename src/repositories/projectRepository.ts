@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+import sequelize from '../config/database';
 import { ProjectModel } from '../models/ProjectModel';
 import { Project, IProjectRepository } from '../domain/Project';
 
@@ -62,8 +64,45 @@ export class ProjectRepository implements IProjectRepository {
     return deleted > 0;
   }
 
-  public async reorder(id: number, order: number): Promise<boolean> {
-    const updated = await ProjectModel.update({ column_order: order } as any, { where: { id } as any });
-    return updated[0] > 0;
+  public async reorder(id: number, direction: 'up' | 'down'): Promise<boolean> {
+    const currentProject = await ProjectModel.findByPk(id);
+    if (!currentProject) {
+      return false;
+    }
+
+    const currentOrder = currentProject.column_order ?? 0;
+    const operator = direction === 'up' ? Op.lt : Op.gt;
+    const sortOrder: 'DESC' | 'ASC' = direction === 'up' ? 'DESC' : 'ASC';
+
+    const adjacentProject = await ProjectModel.findOne({
+      where: {
+        column_order: {
+          [operator]: currentOrder,
+        },
+      },
+      order: [['column_order', sortOrder]],
+    });
+
+    if (!adjacentProject) {
+      return true;
+    }
+
+    const transaction = await sequelize.transaction();
+    try {
+      const adjacentOrder = adjacentProject.column_order;
+      await ProjectModel.update(
+        { column_order: adjacentOrder },
+        { where: { id: currentProject.id }, transaction }
+      );
+      await ProjectModel.update(
+        { column_order: currentOrder },
+        { where: { id: adjacentProject.id }, transaction }
+      );
+      await transaction.commit();
+      return true;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 }

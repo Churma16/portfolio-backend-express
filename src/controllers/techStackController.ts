@@ -95,8 +95,23 @@ export class TechStackController {
   public async reorder(req: Request, res: Response): Promise<void> {
     try {
       const id = parseInt(req.params.id as string, 10);
-      const { column_order } = req.body;
-      await this.usecase.reorder(id, column_order);
+      if (isNaN(id)) {
+        res.status(400).json(errorResponse(400, 'error', 'Invalid ID'));
+        return;
+      }
+
+      const { direction } = req.body;
+      if (!direction || (direction !== 'up' && direction !== 'down')) {
+        res.status(400).json(errorResponse(400, 'error', 'Direction is required and must be "up" or "down"'));
+        return;
+      }
+
+      const isUpdated = await this.usecase.reorder(id, direction);
+      if (!isUpdated) {
+        res.status(404).json(errorResponse(404, 'error', 'TechStack not found'));
+        return;
+      }
+
       await deleteCacheByPrefix('tech_stacks:');
 
       const meta = newMeta(200, 'success', 'TechStack reordered successfully');

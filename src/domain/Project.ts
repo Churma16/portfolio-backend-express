@@ -52,5 +52,5 @@ export interface IProjectRepository {
   create(project: Project): Promise<Project>;
   update(id: number, data: Partial<Project>): Promise<Project | null>;
   delete(id: number): Promise<boolean>;
-  reorder(id: number, order: number): Promise<boolean>;
+  reorder(id: number, direction: 'up' | 'down'): Promise<boolean>;
 }
