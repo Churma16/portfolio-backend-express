@@ -1,0 +1,67 @@
+name: Snapshot Pre-Release
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "**.md"
+      - ".github/workflows/manual-release.yml"
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: snapshot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    name: Snapshot Pre-Release
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):') && !startsWith(github.event.head_commit.message, 'Release ')"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Compute Snapshot Metadata
+        id: meta
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+          # 1. Prioritize official SemVer release tag (strictly vX.Y.Z, excluding snapshots/prereleases)
+          LATEST_OFFICIAL_TAG=$(git tag -l "v*" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)
+
+          if [ -n "$LATEST_OFFICIAL_TAG" ]; then
+            BASE_VERSION="${LATEST_OFFICIAL_TAG#v}"
+          elif [ -f "package.json" ]; then
+            BASE_VERSION=$(node -p "require('./package.json').version.replace(/^v/, '').split('-')[0]")
+          elif [ -f "VERSION" ]; then
+            BASE_VERSION=$(cat VERSION | tr -d '[:space:]' | sed 's/^v//' | cut -d'-' -f1)
+          else
+            BASE_VERSION="1.0.0"
+          fi
+
+          SNAPSHOT_TAG="v${BASE_VERSION}-snapshot.${SHORT_SHA}"
+          echo "snapshot_tag=$SNAPSHOT_TAG" >> "$GITHUB_OUTPUT"
+          echo "[info] Computed snapshot tag: $SNAPSHOT_TAG"
+
+      - name: Publish GitHub Snapshot Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.snapshot_tag }}
+          name: "Snapshot ${{ steps.meta.outputs.snapshot_tag }}"
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            ### Snapshot Preview Build
+
+            Automated snapshot pre-release built from commit `${{ github.sha }}` on `master`.
+            Tag: `${{ steps.meta.outputs.snapshot_tag }}`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

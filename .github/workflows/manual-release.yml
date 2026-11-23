@@ -1,0 +1,209 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_title:
+        description: "Custom Release Title (leave empty to generate via LLM; if provided, LLM call is bypassed)"
+        required: false
+        type: string
+      release_channel:
+        description: "Release Channel"
+        required: true
+        default: "stable"
+        type: choice
+        options:
+          - stable
+          - beta
+          - alpha
+      bump_type:
+        description: "SemVer Increment Type"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: "Dry Run (simulate version calculation without publishing tag, release, or deploy)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Cut Release
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.bump.outputs.tag_name }}
+    steps:
+      - name: Validate Release Branch
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/master" ]; then
+            echo "[error] Official releases can only be published from the 'master' branch (current ref: ${{ github.ref }})." >&2
+            exit 1
+          fi
+
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node Runtime
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      # ---------------------------------------------------------
+      # 1. Resolve Release Title (Fail-Closed with Manual Bypass)
+      # ---------------------------------------------------------
+      - name: Resolve Release Title
+        id: title_resolver
+        env:
+          USER_CUSTOM_TITLE: ${{ inputs.release_title }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          if [ -n "$USER_CUSTOM_TITLE" ]; then
+            echo "[info] User provided custom title. Bypassing LLM call."
+            echo "final_title<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$USER_CUSTOM_TITLE" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          else
+            echo "[info] Custom title empty. Invoking LLM for release title synthesis..."
+            if [ -z "$OPENROUTER_API_KEY" ]; then
+              echo "[error] OPENROUTER_API_KEY is not configured and no custom title was provided." >&2
+              echo "[error] Fail-closed: release aborted. Please provide a custom title or set the secret." >&2
+              exit 1
+            fi
+
+            set -e
+            AI_TITLE=$(node .github/scripts/generate-release-title.mjs)
+
+            if [ -z "$AI_TITLE" ]; then
+              echo "[error] LLM failed to produce a valid release title." >&2
+              exit 1
+            fi
+
+            echo "[info] LLM title generated successfully: $AI_TITLE"
+            echo "final_title<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$AI_TITLE" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ---------------------------------------------------------
+      # 2. Determine Next Semantic Version
+      # ---------------------------------------------------------
+      - name: Calculate Next Version
+        id: bump
+        run: |
+          PRERELEASE_FLAG=""
+          if [ "${{ inputs.release_channel }}" != "stable" ]; then
+            PRERELEASE_FLAG="--prerelease ${{ inputs.release_channel }}"
+          fi
+
+          BUMP_FLAG=""
+          if [ "${{ inputs.bump_type }}" != "auto" ]; then
+            BUMP_FLAG="--release-as ${{ inputs.bump_type }}"
+          fi
+
+          npx -y commit-and-tag-version $PRERELEASE_FLAG $BUMP_FLAG --skip.commit --skip.tag
+
+          RESOLVED_VERSION=$(node -p "require('./package.json').version")
+          RESOLVED_TAG="v${RESOLVED_VERSION#v}"
+
+          echo "tag_name=$RESOLVED_TAG" >> "$GITHUB_OUTPUT"
+          echo "[info] Target Release Tag: $RESOLVED_TAG (Channel: ${{ inputs.release_channel }})"
+
+      # ---------------------------------------------------------
+      # 3. Create Tag and Publish Official GitHub Release
+      # ---------------------------------------------------------
+      - name: Push Git Tag
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.bump.outputs.tag_name }}" -m "Release ${{ steps.bump.outputs.tag_name }}"
+          git push origin "${{ steps.bump.outputs.tag_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Official GitHub Release
+        if: ${{ !inputs.dry_run }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.bump.outputs.tag_name }}
+          name: "${{ steps.bump.outputs.tag_name }} - ${{ steps.title_resolver.outputs.final_title }}"
+          generate_release_notes: true
+          prerelease: ${{ inputs.release_channel != 'stable' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # -------------------------------------------------------------
+  # Job 2: Build Container and Deploy to Production VPS
+  # -------------------------------------------------------------
+  deploy:
+    name: Build & Deploy Production Container
+    needs: release
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node Runtime
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/churma16/portfolio-backend-express:${{ needs.release.outputs.tag_name }}
+            ghcr.io/churma16/portfolio-backend-express:latest
+
+      - name: Activate Service on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          IMAGE_TAG: "ghcr.io/churma16/portfolio-backend-express:${{ needs.release.outputs.tag_name }}"
+        with:
+          envs: IMAGE_TAG
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            echo "[deploy] Updating Express Backend to $IMAGE_TAG"
+            docker pull "$IMAGE_TAG"
+            docker compose -f /home/ubuntu/churma-codes/docker-compose.yml up -d --no-deps backend-express
+            docker system prune -f
