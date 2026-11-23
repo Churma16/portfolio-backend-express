@@ -11,9 +11,26 @@ if (!openRouterApiKey) {
 // 1. Collect conventional commits since the latest git tag
 let rawCommitLines = [];
 try {
-  const latestOfficialTag = execSync("git tag -l 'v*' | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -n1 2>/dev/null || true")
-    .toString()
-    .trim();
+  // Use cross-platform git tag resolution (avoid shell pipe grep/sort/tail)
+  let latestOfficialTag = "";
+  try {
+    const allTagsOutput = execSync('git tag -l "v*" --sort=v:refname 2>/dev/null || true')
+      .toString()
+      .trim();
+    if (allTagsOutput) {
+      const semverRegex = /^v\d+\.\d+\.\d+$/;
+      const officialTags = allTagsOutput
+        .split("\n")
+        .map((t) => t.trim())
+        .filter((t) => semverRegex.test(t));
+      if (officialTags.length > 0) {
+        latestOfficialTag = officialTags[officialTags.length - 1];
+      }
+    }
+  } catch {
+    latestOfficialTag = "";
+  }
+
   const revisionTarget = latestOfficialTag ? `${latestOfficialTag}..HEAD` : "HEAD";
   const gitLogOutput = execSync(`git log ${revisionTarget} --pretty=format:"* %s"`)
     .toString()
