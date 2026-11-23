@@ -34,24 +34,21 @@ export class MessageUsecase implements IMessageUsecase {
     newEntity.validate();
     const createdMessage = await this.repo.create(newEntity);
 
-    // Send email notification asynchronously
-    if (process.env.RESEND_API_KEY) {
-      const emailHtml = getContactEmailTemplate({
+    // Dispatch contact notification to portfolio-notifier microservice asynchronously
+    const notifierUrl = process.env.NOTIFIER_URL || 'http://portfolio-notifier:8080/api/notify';
+    fetch(notifierUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         name: data.name,
         email: data.email,
-        content: data.content
-      });
-
-      this.resend.emails.send({
-        from: `Portfolio Contact <${process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`, 
-        to: process.env.MY_EMAIL || 'fathan@example.com', 
-        subject: `[Pesan Baru]: ${data.name}`,
-        html: emailHtml,
-        replyTo: data.email,
-      }).catch(err => {
-        console.error('Failed to send email via Resend:', err);
-      });
-    }
+        message: data.content,
+        source: 'express',
+      }),
+      signal: AbortSignal.timeout(5000),
+    }).catch((err: any) => {
+      console.error('[fail] Failed to dispatch notification to portfolio-notifier:', err?.message || err);
+    });
 
     return createdMessage;
   }
