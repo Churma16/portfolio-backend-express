@@ -40,6 +40,7 @@ import { TechStackCategoryController } from '../controllers/techStackCategoryCon
 import { authMiddleware } from '../shared/middlewares/authMiddleware';
 import { rateLimiterMiddleware } from '../shared/middlewares/rateLimiterMiddleware';
 import { InternalController } from '../controllers/internalController';
+import { CacheController } from '../controllers/cacheController';
 
 const apiRouter = Router();
 
@@ -71,6 +72,7 @@ const workExperienceController = bindController(new WorkExperienceController(new
 const techStackCategoryController = bindController(new TechStackCategoryController(new TechStackCategoryUsecase(new TechStackCategoryRepository())));
 const healthController = bindController(new HealthController());
 const internalController = bindController(new InternalController());
+const cacheController = bindController(new CacheController());
 
 // ==========================================
 // ROUTES GROUPS
@@ -145,5 +147,7 @@ apiRouter.post('/work-experiences', workExperienceController.create);
 apiRouter.put('/work-experiences/:id', workExperienceController.update);
 apiRouter.delete('/work-experiences/:id', workExperienceController.delete);
 apiRouter.post('/work-experiences/:id/reorder', workExperienceController.reorder);
+
+apiRouter.post('/cache/flush', cacheController.flush);
 
 export default apiRouter;
