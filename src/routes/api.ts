@@ -43,20 +43,34 @@ import { InternalController } from '../controllers/internalController';
 
 const apiRouter = Router();
 
+/**
+ * Automatically binds all prototype methods of a controller instance to itself,
+ * enabling clean method references in Express routing without boilerplate wrapper closures.
+ */
+function bindController<T extends object>(controller: T): T {
+  const prototype = Object.getPrototypeOf(controller);
+  for (const propertyName of Object.getOwnPropertyNames(prototype)) {
+    if (propertyName !== 'constructor' && typeof (controller as any)[propertyName] === 'function') {
+      (controller as any)[propertyName] = (controller as any)[propertyName].bind(controller);
+    }
+  }
+  return controller;
+}
+
 // ==========================================
-// DEPENDENCY INJECTION
+// DEPENDENCY INJECTION & CONTROLLERS
 // ==========================================
-const projectController = new ProjectController(new ProjectUsecase(new ProjectRepository()));
-const userController = new UserController(new UserUsecase(new UserRepository()));
-const categoryController = new CategoryController(new CategoryUsecase(new CategoryRepository()));
-const messageController = new MessageController(new MessageUsecase(new MessageRepository()));
-const techStackController = new TechStackController(new TechStackUsecase(new TechStackRepository()));
-const tagController = new TagController(new TagUsecase(new TagRepository()));
-const profileController = new ProfileController(new ProfileUsecase(new ProfileRepository()));
-const workExperienceController = new WorkExperienceController(new WorkExperienceUsecase(new WorkExperienceRepository()));
-const techStackCategoryController = new TechStackCategoryController(new TechStackCategoryUsecase(new TechStackCategoryRepository()));
-const healthController = new HealthController();
-const internalController = new InternalController();
+const projectController = bindController(new ProjectController(new ProjectUsecase(new ProjectRepository())));
+const userController = bindController(new UserController(new UserUsecase(new UserRepository())));
+const categoryController = bindController(new CategoryController(new CategoryUsecase(new CategoryRepository())));
+const messageController = bindController(new MessageController(new MessageUsecase(new MessageRepository())));
+const techStackController = bindController(new TechStackController(new TechStackUsecase(new TechStackRepository())));
+const tagController = bindController(new TagController(new TagUsecase(new TagRepository())));
+const profileController = bindController(new ProfileController(new ProfileUsecase(new ProfileRepository())));
+const workExperienceController = bindController(new WorkExperienceController(new WorkExperienceUsecase(new WorkExperienceRepository())));
+const techStackCategoryController = bindController(new TechStackCategoryController(new TechStackCategoryUsecase(new TechStackCategoryRepository())));
+const healthController = bindController(new HealthController());
+const internalController = bindController(new InternalController());
 
 // ==========================================
 // ROUTES GROUPS
@@ -64,72 +78,72 @@ const internalController = new InternalController();
 
 // --- PUBLIC ROUTES ---
 apiRouter.get('/', (req, res) => { res.json({ message: 'API is running' }); });
-apiRouter.get('/health', (req, res) => healthController.check(req, res));
+apiRouter.get('/health', healthController.check);
 
 // Secure cache invalidation endpoint called by Go API
-apiRouter.post('/internal/cache/invalidate', (req, res) => internalController.invalidateCache(req, res));
+apiRouter.post('/internal/cache/invalidate', internalController.invalidateCache);
 
 // Auth
-apiRouter.post('/login', (req, res) => userController.login(req, res));
+apiRouter.post('/login', userController.login);
 
-apiRouter.get('/projects', (req, res) => projectController.getAll(req, res));
-apiRouter.get('/projects/:id', (req, res) => projectController.getById(req, res));
+apiRouter.get('/projects', projectController.getAll);
+apiRouter.get('/projects/:id', projectController.getById);
 
-apiRouter.get('/categories', (req, res) => categoryController.getAll(req, res));
-apiRouter.get('/categories/:id', (req, res) => categoryController.getById(req, res));
+apiRouter.get('/categories', categoryController.getAll);
+apiRouter.get('/categories/:id', categoryController.getById);
 
-apiRouter.get('/tech-stacks', (req, res) => techStackController.getAll(req, res));
-apiRouter.get('/tech-stacks/:id', (req, res) => techStackController.getById(req, res));
+apiRouter.get('/tech-stacks', techStackController.getAll);
+apiRouter.get('/tech-stacks/:id', techStackController.getById);
 
-apiRouter.get('/tech-stack-categories', (req, res) => techStackCategoryController.getAll(req, res));
-apiRouter.get('/tech-stack-categories/:id', (req, res) => techStackCategoryController.getById(req, res));
+apiRouter.get('/tech-stack-categories', techStackCategoryController.getAll);
+apiRouter.get('/tech-stack-categories/:id', techStackCategoryController.getById);
 
-apiRouter.get('/tags', (req, res) => tagController.getAll(req, res));
-apiRouter.get('/tags/:id', (req, res) => tagController.getById(req, res));
+apiRouter.get('/tags', tagController.getAll);
+apiRouter.get('/tags/:id', tagController.getById);
 
-apiRouter.get('/profiles', (req, res) => profileController.getAll(req, res));
-apiRouter.get('/profiles/:id', (req, res) => profileController.getById(req, res));
+apiRouter.get('/profiles', profileController.getAll);
+apiRouter.get('/profiles/:id', profileController.getById);
 
-apiRouter.get('/work-experiences', (req, res) => workExperienceController.getAll(req, res));
-apiRouter.get('/work-experiences/:id', (req, res) => workExperienceController.getById(req, res));
+apiRouter.get('/work-experiences', workExperienceController.getAll);
+apiRouter.get('/work-experiences/:id', workExperienceController.getById);
 
 // Messages with Rate Limiter
-apiRouter.post('/messages', rateLimiterMiddleware('3-H'), (req, res) => messageController.create(req, res));
+apiRouter.post('/messages', rateLimiterMiddleware('3-H'), messageController.create);
 
 // --- PRIVATE ROUTES (Require Authentication) ---
 apiRouter.use(authMiddleware);
 
-apiRouter.post('/users', (req, res) => userController.create(req, res));
+apiRouter.post('/users', userController.create);
 
-apiRouter.post('/projects', (req, res) => projectController.create(req, res));
-apiRouter.put('/projects/:id', (req, res) => projectController.update(req, res));
-apiRouter.delete('/projects/:id', (req, res) => projectController.delete(req, res));
-apiRouter.post('/projects/:id/reorder', (req, res) => projectController.reorder(req, res));
+apiRouter.post('/projects', projectController.create);
+apiRouter.put('/projects/:id', projectController.update);
+apiRouter.delete('/projects/:id', projectController.delete);
+apiRouter.post('/projects/:id/reorder', projectController.reorder);
 
-apiRouter.post('/categories', (req, res) => categoryController.create(req, res));
-apiRouter.put('/categories/:id', (req, res) => categoryController.update(req, res));
-apiRouter.delete('/categories/:id', (req, res) => categoryController.delete(req, res));
+apiRouter.post('/categories', categoryController.create);
+apiRouter.put('/categories/:id', categoryController.update);
+apiRouter.delete('/categories/:id', categoryController.delete);
 
-apiRouter.post('/tech-stacks', (req, res) => techStackController.create(req, res));
-apiRouter.put('/tech-stacks/:id', (req, res) => techStackController.update(req, res));
-apiRouter.delete('/tech-stacks/:id', (req, res) => techStackController.delete(req, res));
-apiRouter.post('/tech-stacks/:id/reorder', (req, res) => techStackController.reorder(req, res));
+apiRouter.post('/tech-stacks', techStackController.create);
+apiRouter.put('/tech-stacks/:id', techStackController.update);
+apiRouter.delete('/tech-stacks/:id', techStackController.delete);
+apiRouter.post('/tech-stacks/:id/reorder', techStackController.reorder);
 
-apiRouter.post('/tech-stack-categories', (req, res) => techStackCategoryController.create(req, res));
-apiRouter.put('/tech-stack-categories/:id', (req, res) => techStackCategoryController.update(req, res));
-apiRouter.delete('/tech-stack-categories/:id', (req, res) => techStackCategoryController.delete(req, res));
+apiRouter.post('/tech-stack-categories', techStackCategoryController.create);
+apiRouter.put('/tech-stack-categories/:id', techStackCategoryController.update);
+apiRouter.delete('/tech-stack-categories/:id', techStackCategoryController.delete);
 
-apiRouter.post('/tags', (req, res) => tagController.create(req, res));
-apiRouter.put('/tags/:id', (req, res) => tagController.update(req, res));
-apiRouter.delete('/tags/:id', (req, res) => tagController.delete(req, res));
+apiRouter.post('/tags', tagController.create);
+apiRouter.put('/tags/:id', tagController.update);
+apiRouter.delete('/tags/:id', tagController.delete);
 
-apiRouter.post('/profiles', (req, res) => profileController.create(req, res));
-apiRouter.put('/profiles/:id', (req, res) => profileController.update(req, res));
-apiRouter.delete('/profiles/:id', (req, res) => profileController.delete(req, res));
+apiRouter.post('/profiles', profileController.create);
+apiRouter.put('/profiles/:id', profileController.update);
+apiRouter.delete('/profiles/:id', profileController.delete);
 
-apiRouter.post('/work-experiences', (req, res) => workExperienceController.create(req, res));
-apiRouter.put('/work-experiences/:id', (req, res) => workExperienceController.update(req, res));
-apiRouter.delete('/work-experiences/:id', (req, res) => workExperienceController.delete(req, res));
-apiRouter.post('/work-experiences/:id/reorder', (req, res) => workExperienceController.reorder(req, res));
+apiRouter.post('/work-experiences', workExperienceController.create);
+apiRouter.put('/work-experiences/:id', workExperienceController.update);
+apiRouter.delete('/work-experiences/:id', workExperienceController.delete);
+apiRouter.post('/work-experiences/:id/reorder', workExperienceController.reorder);
 
 export default apiRouter;

@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import sequelize from './config/database';
@@ -14,8 +15,10 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 // ==========================================
-// ROUTES
+// ROUTES & STATIC ASSETS
 // ==========================================
+const storagePath = process.env.STORAGE_PATH || path.join(__dirname, '../storage');
+app.use('/storage', express.static(storagePath));
 app.use('/api', apiRouter);
 
 import { connectRedis } from './config/redis';

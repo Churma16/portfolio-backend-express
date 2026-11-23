@@ -21,6 +21,13 @@ export class MessageController {
 
   public async create(req: Request, res: Response): Promise<void> {
     try {
+      const { gotcha } = req.body;
+      if (gotcha) {
+        const meta = newMeta(201, 'success', 'Message created successfully');
+        res.status(201).json(newSingleDataResponse(meta, null));
+        return;
+      }
+
       const data = await this.usecase.create(req.body);
       const meta = newMeta(201, 'success', 'Message created successfully');
       res.status(201).json(newSingleDataResponse(meta, data));
