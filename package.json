@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "type-check": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test \"src/**/*.test.ts\""
+    "test": "node --import tsx --test $(find src -name '*.test.ts')"
   },
   "keywords": [],
   "author": "",

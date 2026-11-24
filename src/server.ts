@@ -4,6 +4,7 @@ import cors from 'cors';
 import sequelize from './config/database';
 import apiRouter from './routes/api';
 import { loggerMiddleware } from './shared/middlewares/loggerMiddleware';
+import { telemetryMiddleware } from './shared/middlewares/telemetryMiddleware';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -13,6 +14,7 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use(loggerMiddleware);
+app.use(telemetryMiddleware);
 
 // ==========================================
 // ROUTES & STATIC ASSETS
