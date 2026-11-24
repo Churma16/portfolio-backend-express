@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { IMessageUsecase } from '../usecases/messageUsecase';
 import { newMeta, newMultipleDataResponse, newSingleDataResponse, errorResponse } from '../shared/utils/response';
+import { dispatchTelemetry } from '../shared/middlewares/telemetryMiddleware';
 
 export class MessageController {
   private usecase: IMessageUsecase;
@@ -23,12 +24,21 @@ export class MessageController {
     try {
       const { gotcha } = req.body;
       if (gotcha) {
+        dispatchTelemetry({
+          source: 'express',
+          type: 'spam_blocked',
+          metadata: { reason: 'honeypot' },
+        });
         const meta = newMeta(201, 'success', 'Message created successfully');
         res.status(201).json(newSingleDataResponse(meta, null));
         return;
       }
 
       const data = await this.usecase.create(req.body);
+      dispatchTelemetry({
+        source: 'express',
+        type: 'contact_submit',
+      });
       const meta = newMeta(201, 'success', 'Message created successfully');
       res.status(201).json(newSingleDataResponse(meta, data));
     } catch (error: any) {
